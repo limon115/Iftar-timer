@@ -3,41 +3,41 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:   # allows manual run
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Get your repo files
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Unzip the uploaded project ZIP
       - name: Unzip project
-        run: |
-          unzip *.zip -d project
-          ls project
+        run: unzip *.zip -d project
 
-      # 3️⃣ Setup Java (required for Android build)
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 4️⃣ Make Gradle executable
-      - name: Grant gradlew permission
-        run: chmod +x project/**/gradlew
+      # 🔍 Find the folder containing gradlew automatically
+      - name: Locate project root
+        id: findroot
+        run: |
+          ROOT=$(find project -name gradlew | head -n 1 | xargs dirname)
+          echo "ROOT=$ROOT" >> $GITHUB_ENV
+          echo "Project root is $ROOT"
 
-      # 5️⃣ Build Debug APK
+      - name: Grant permission
+        run: chmod +x "$ROOT/gradlew"
+
       - name: Build APK
         run: |
-          cd project
+          cd "$ROOT"
           ./gradlew assembleDebug
 
-      # 6️⃣ Upload APK as downloadable artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
