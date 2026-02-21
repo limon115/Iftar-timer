@@ -10,34 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Unzip project
         run: unzip *.zip -d project
 
+      # 🔧 Install Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ☕ Install JDK
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      # 🔍 Find the folder containing gradlew automatically
+      # ⚙️ Install Gradle
+      - name: Install Gradle
+        run: sudo apt-get update && sudo apt-get install -y gradle
+
+      # 🔍 Find project root (contains settings.gradle)
       - name: Locate project root
-        id: findroot
         run: |
-          ROOT=$(find project -name gradlew | head -n 1 | xargs dirname)
+          ROOT=$(find project -name "settings.gradle" | head -n 1 | xargs dirname)
           echo "ROOT=$ROOT" >> $GITHUB_ENV
-          echo "Project root is $ROOT"
+          echo "Project root: $ROOT"
 
-      - name: Grant permission
-        run: chmod +x "$ROOT/gradlew"
-
-      - name: Build APK
+      # 🚀 Build APK
+      - name: Build Debug APK
         run: |
           cd "$ROOT"
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
+      # 📦 Upload result
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
