@@ -10,13 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Unzip project
         run: unzip *.zip -d project
 
-      - name: Setup JDK 17
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -31,25 +30,27 @@ jobs:
           unzip gradle-8.7-bin.zip
           echo "$PWD/gradle-8.7/bin" >> $GITHUB_PATH
 
-      # 🔍 Find project root
       - name: Locate project root
         run: |
           ROOT=$(find project -name "settings.gradle" | head -n 1 | xargs dirname)
           echo "ROOT=$ROOT" >> $GITHUB_ENV
 
-      # ⭐ Enable AndroidX (THIS FIXES YOUR ERROR)
       - name: Enable AndroidX
         run: |
           echo "android.useAndroidX=true" >> "$ROOT/gradle.properties"
           echo "android.enableJetifier=true" >> "$ROOT/gradle.properties"
 
-      - name: Build Debug APK
+      # ⭐ REMOVE BROKEN GENERATED FILE
+      - name: Remove bad values.xml
+        run: |
+          find project -path "*/build/*/values/values.xml" -delete
+
+      - name: Build APK
         run: |
           cd "$ROOT"
           gradle assembleDebug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: iftar-timer-debug-apk
           path: project/**/app/build/outputs/apk/debug/*.apk
