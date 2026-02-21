@@ -16,22 +16,25 @@ jobs:
       - name: Unzip project
         run: unzip *.zip -d project
 
-      # 🔧 Install Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # ☕ Install JDK
+      # ☕ JDK
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # ⚙️ Install Gradle
-      - name: Install Gradle
-        run: sudo apt-get update && sudo apt-get install -y gradle
+      # 📱 Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
-      # 🔍 Find project root (contains settings.gradle)
+      # 🔥 Install MODERN Gradle (8.x)
+      - name: Install Gradle 8
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip gradle-8.7-bin.zip
+          echo "$PWD/gradle-8.7/bin" >> $GITHUB_PATH
+
+      # 🔍 Find project root
       - name: Locate project root
         run: |
           ROOT=$(find project -name "settings.gradle" | head -n 1 | xargs dirname)
