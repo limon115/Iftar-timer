@@ -40,11 +40,8 @@ jobs:
           echo "android.useAndroidX=true" >> "$ROOT/gradle.properties"
           echo "android.enableJetifier=true" >> "$ROOT/gradle.properties"
 
-      # ⭐ REMOVE BROKEN GENERATED FILE
-      - name: Remove bad values.xml
-        run: |
-          find project -path "*/build/*/values/values.xml" -delete
-
+      
+      
       - name: Build APK
         run: |
           cd "$ROOT"
